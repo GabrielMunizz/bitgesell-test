@@ -4,22 +4,37 @@ const path = require('path');
 const router = express.Router();
 const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
-// Utility to read data (intentionally sync to highlight blocking issue)
-function readData() {
-  const raw = fs.readFileSync(DATA_PATH);
+async function readFileAsync(filePath) {
+  try {
+    const data = await fs.promises.readFile(filePath, 'utf-8');
+
+    return data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
+// Utility to read data refactored with non‑blocking async operations
+async function readData() {
+  const raw = await readFileAsync(DATA_PATH);
+
   return JSON.parse(raw);
 }
 
 // GET /api/items
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
-    const data = readData();
+    const data = await readData();
+
     const { limit, q } = req.query;
     let results = data;
 
     if (q) {
       // Simple substring search (sub‑optimal)
-      results = results.filter(item => item.name.toLowerCase().includes(q.toLowerCase()));
+      results = results.filter((item) =>
+        item.name.toLowerCase().includes(q.toLowerCase())
+      );
     }
 
     if (limit) {
@@ -33,10 +48,11 @@ router.get('/', (req, res, next) => {
 });
 
 // GET /api/items/:id
-router.get('/:id', (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   try {
-    const data = readData();
-    const item = data.find(i => i.id === parseInt(req.params.id));
+    const data = await readData();
+    const item = data.find((i) => i.id === parseInt(req.params.id));
+
     if (!item) {
       const err = new Error('Item not found');
       err.status = 404;
@@ -49,11 +65,11 @@ router.get('/:id', (req, res, next) => {
 });
 
 // POST /api/items
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     // TODO: Validate payload (intentional omission)
     const item = req.body;
-    const data = readData();
+    const data = await readData();
     item.id = Date.now();
     data.push(item);
     fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
