@@ -2,8 +2,10 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const router = express.Router();
+const client = require('../elastic/client');
 const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 
+// Reads an async file using fs.promises.readFile (non-blocking I/O)
 async function readFileAsync(filePath) {
   try {
     const data = await fs.promises.readFile(filePath, 'utf-8');
@@ -15,7 +17,7 @@ async function readFileAsync(filePath) {
   }
 }
 
-// Utility to read data refactored with non‑blocking async operations
+// Utility to read data
 async function readData() {
   const raw = await readFileAsync(DATA_PATH);
 
@@ -24,26 +26,52 @@ async function readData() {
 
 // GET /api/items
 router.get('/', async (req, res, next) => {
+  // Optimized search with Elasticsearch
+  const { limit = 500, q } = req.query;
   try {
-    const data = await readData();
+    const esQuery = q
+      ? {
+          query: {
+            match: {
+              name: {
+                query: q,
+                fuzziness: 'AUTO',
+              },
+            },
+          },
+        }
+      : { query: { match_all: {} } };
 
-    const { limit, q } = req.query;
-    let results = data;
+    const { hits } = await client.search({
+      index: 'items',
+      size: parseInt(limit),
+      ...esQuery,
+    });
 
-    if (q) {
-      // Simple substring search (sub‑optimal)
-      results = results.filter((item) =>
-        item.name.toLowerCase().includes(q.toLowerCase())
-      );
-    }
-
-    if (limit) {
-      results = results.slice(0, parseInt(limit));
-    }
+    const results = hits.hits.map((hit) => hit._source);
 
     res.json(results);
   } catch (err) {
-    next(err);
+    // If error fallback to local search
+    console.error('Elasticsearch failed, falling back to local data');
+    try {
+      const data = await readData();
+      let results = data;
+
+      if (q) {
+        results = results.filter((item) =>
+          item.name.toLowerCase().includes(q.toLowerCase())
+        );
+      }
+
+      if (limit) {
+        results = results.slice(0, parseInt(limit));
+      }
+
+      res.json(results);
+    } catch (fallbackErr) {
+      next(fallbackErr);
+    }
   }
 });
 
@@ -67,12 +95,25 @@ router.get('/:id', async (req, res, next) => {
 // POST /api/items
 router.post('/', async (req, res, next) => {
   try {
-    // TODO: Validate payload (intentional omission)
-    const item = req.body;
+    // Basic type validation
+    const { name, price } = req.body;
+
+    if (typeof name !== 'string' || typeof price !== 'number') {
+      return res.status(400).json({
+        error: 'Invalid payload: name must be string and price must be number!',
+      });
+    }
+
+    const item = {
+      id: Date.now(),
+      name,
+      price,
+    };
+
     const data = await readData();
-    item.id = Date.now();
     data.push(item);
     fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+
     res.status(201).json(item);
   } catch (err) {
     next(err);
