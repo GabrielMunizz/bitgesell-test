@@ -50,6 +50,10 @@ router.get('/', async (req, res, next) => {
 
     const results = hits.hits.map((hit) => hit._source);
 
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Item not found!' });
+    }
+
     res.json(results);
   } catch (err) {
     // If error fallback to local search
@@ -66,6 +70,10 @@ router.get('/', async (req, res, next) => {
 
       if (limit) {
         results = results.slice(0, parseInt(limit));
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Item not found!' });
       }
 
       res.json(results);
