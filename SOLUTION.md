@@ -50,6 +50,7 @@
 - I used components and hooks (useState, useEffect) to manage state and side effects.
 - Code was split into small reusable components like ItemList, Pagination, and Loader, improving readability and maintainability.
 - I didn’t style the app much to deliver on time because my schedule is tight. If I had more time, I’d use Tailwind to make it look better. For now, I focused on making it work well.
+- Also, I would add TypeScript.
 - Added mocks so tests could run properly without API dependency.
 - I chose to use Elasticsearch because I noticed the filter function was marked as “sub-optimal.” Added a fallback for safety.
 
