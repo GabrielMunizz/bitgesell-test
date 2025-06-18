@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useData } from '../state/DataContext';
-import Pagination from '../components/Pagination';
-import Loader from '../components/Loader';
-import ItemList from '../components/ItemList';
+import Pagination from '../components/Pagination/Pagination';
+import Loader from '../components/Loader/Loader';
+import ItemList from '../components/ItemList/ItemList';
 
 function Items() {
   const [isLoading, setIsLoading] = useState(false);
