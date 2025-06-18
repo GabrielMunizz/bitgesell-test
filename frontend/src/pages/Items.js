@@ -7,7 +7,7 @@ import ItemList from '../components/ItemList';
 function Items() {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [limit, _setLimit] = useState(3);
+  const [limit, _setLimit] = useState(5);
   const { items, fetchItems } = useData();
 
   useEffect(() => {

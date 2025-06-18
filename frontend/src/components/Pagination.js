@@ -3,7 +3,7 @@ import React from 'react';
 function Pagination({ limit, items, setPage }) {
   // number of pages according to limit
   const pagination = Array.from(
-    { length: items?.total / limit },
+    { length: Math.ceil(items?.total / limit) },
     (_v, k) => k + 1
   );
 
