@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader/Loader';
+import Item from '../components/Item/Item';
 
 function ItemDetail() {
   const { id } = useParams();
@@ -37,17 +38,10 @@ function ItemDetail() {
   }, [id, navigate]);
 
   if (isLoading) return <Loader />;
-  if (!item) return <p>Item not found!</p>;
 
   return (
     <div style={{ padding: 16 }}>
-      <h2>{item?.name}</h2>
-      <p>
-        <strong>Category:</strong> {item?.category}
-      </p>
-      <p>
-        <strong>Price:</strong> ${item?.price}
-      </p>
+      <Item item={item} />
     </div>
   );
 }
