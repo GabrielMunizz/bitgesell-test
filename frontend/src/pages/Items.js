@@ -6,14 +6,25 @@ function Items() {
   const { items, fetchItems } = useData();
 
   useEffect(() => {
-    let active = true;
+    // controller to signal if fetch should continue or abort
+    const controller = new AbortController();
+    const { signal } = controller;
 
-    // Intentional bug: setState called after component unmount if request is slow
-    fetchItems().catch(console.error);
+    const fetch = async () => {
+      try {
+        await fetchItems(signal);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Fetch failed!', err);
+        }
+      }
+    };
 
-    // Clean‑up to avoid memory leak (candidate should implement)
+    fetch();
+
+    // aborts fetch in case component unmounts before its completion
     return () => {
-      active = false;
+      controller.abort();
     };
   }, [fetchItems]);
 
@@ -21,7 +32,7 @@ function Items() {
 
   return (
     <ul>
-      {items.map(item => (
+      {items.map((item) => (
         <li key={item.id}>
           <Link to={'/items/' + item.id}>{item.name}</Link>
         </li>
