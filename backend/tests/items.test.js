@@ -1,10 +1,19 @@
 const request = require('supertest');
 const express = require('express');
+const fs = require('fs');
 const itemsRouter = require('../src/routes/items');
 const app = express();
 
 app.use(express.json());
 app.use('/api/items', itemsRouter);
+
+beforeEach(() => {
+  jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('GET /api/items', () => {
   it('should return a list of items', async () => {
