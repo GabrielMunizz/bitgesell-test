@@ -7,13 +7,9 @@ const DATA_PATH = path.join(__dirname, '../../../data/items.json');
 let cachedStats = null;
 let lastModifiedTime = null;
 
-function getFileStats(filePath) {
-  return fs.promises.stat(filePath);
-}
-
 async function getStats() {
   try {
-    const stats = await getFileStats(DATA_PATH);
+    const stats = await fs.promises.stat(filePath);
 
     const fileModifiedTime = stats.mtimeMs;
 
