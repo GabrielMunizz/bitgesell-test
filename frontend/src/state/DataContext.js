@@ -6,10 +6,13 @@ export function DataProvider({ children }) {
   const [items, setItems] = useState([]);
 
   // signal to abort fetch if component unmounts before fetch is completed
-  const fetchItems = useCallback(async (signal) => {
-    const res = await fetch('http://localhost:3001/api/items?limit=500', {
-      signal,
-    }); // Intentional bug: backend ignores limit
+  const fetchItems = useCallback(async (signal, page = 1, limit = 10) => {
+    const res = await fetch(
+      `http://localhost:3001/api/items?page=${page}&limit=${limit}`,
+      {
+        signal,
+      }
+    ); // Intentional bug: backend ignores limit
     const json = await res.json();
     setItems(json);
   }, []);

@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useData } from '../state/DataContext';
 import { Link } from 'react-router-dom';
 
 function Items() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, _setLimit] = useState(3);
   const { items, fetchItems } = useData();
 
   useEffect(() => {
@@ -11,12 +14,15 @@ function Items() {
     const { signal } = controller;
 
     const fetch = async () => {
+      setIsLoading(true);
       try {
-        await fetchItems(signal);
+        await fetchItems(signal, page, limit);
       } catch (err) {
         if (err.name !== 'AbortError') {
           console.error('Fetch failed!', err);
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -26,18 +32,52 @@ function Items() {
     return () => {
       controller.abort();
     };
-  }, [fetchItems]);
+  }, [fetchItems, page]);
 
-  if (!items.length) return <p>Loading...</p>;
+  const pagination = Array.from(
+    { length: items?.total / limit },
+    (_v, k) => k + 1
+  );
+
+  if (isLoading) return <p>Loading...</p>;
 
   return (
-    <ul>
-      {items.map((item) => (
-        <li key={item.id}>
-          <Link to={'/items/' + item.id}>{item.name}</Link>
-        </li>
-      ))}
-    </ul>
+    <main>
+      <p>{items?.total} items found</p>
+      <ul>
+        {items.results?.map((item) => (
+          <li key={item.id}>
+            <Link to={'/items/' + item.id}>{item.name}</Link>
+          </li>
+        ))}
+      </ul>
+
+      <div>
+        <p>Page</p>
+        <ul
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            listStyle: 'none',
+            gap: 8,
+          }}
+        >
+          {pagination.map((page) => (
+            <li
+              style={
+                items.page === page
+                  ? { cursor: 'pointer', textDecoration: 'underline' }
+                  : { cursor: 'pointer' }
+              }
+              onClick={() => setPage(page)}
+              key={page}
+            >
+              {page}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </main>
   );
 }
 
