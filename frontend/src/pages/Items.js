@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useData } from '../state/DataContext';
-import { Link } from 'react-router-dom';
 import Pagination from '../components/Pagination';
 import Loader from '../components/Loader';
+import ItemList from '../components/ItemList';
 
 function Items() {
   const [isLoading, setIsLoading] = useState(false);
@@ -47,13 +47,8 @@ function Items() {
   return (
     <main>
       <p>{items?.total} items found</p>
-      <ul>
-        {items.results?.map((item) => (
-          <li key={item.id}>
-            <Link to={'/items/' + item.id}>{item.name}</Link>
-          </li>
-        ))}
-      </ul>
+
+      <ItemList items={items} />
 
       <Pagination pagination={pagination} items={items} setPage={setPage} />
     </main>
