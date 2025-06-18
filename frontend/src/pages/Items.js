@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useData } from '../state/DataContext';
 import { Link } from 'react-router-dom';
+import Pagination from '../components/Pagination';
+import Loader from '../components/Loader';
 
 function Items() {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,12 +36,13 @@ function Items() {
     };
   }, [fetchItems, page]);
 
+  // number of pages according to limit
   const pagination = Array.from(
     { length: items?.total / limit },
     (_v, k) => k + 1
   );
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loader />;
 
   return (
     <main>
@@ -52,31 +55,7 @@ function Items() {
         ))}
       </ul>
 
-      <div>
-        <p>Page</p>
-        <ul
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            listStyle: 'none',
-            gap: 8,
-          }}
-        >
-          {pagination.map((page) => (
-            <li
-              style={
-                items.page === page
-                  ? { cursor: 'pointer', textDecoration: 'underline' }
-                  : { cursor: 'pointer' }
-              }
-              onClick={() => setPage(page)}
-              key={page}
-            >
-              {page}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Pagination pagination={pagination} items={items} setPage={setPage} />
     </main>
   );
 }

@@ -12,7 +12,7 @@ export function DataProvider({ children }) {
       {
         signal,
       }
-    ); // Intentional bug: backend ignores limit
+    );
     const json = await res.json();
     setItems(json);
   }, []);
