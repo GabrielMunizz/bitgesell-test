@@ -34,24 +34,20 @@ router.get('/', async (req, res, next) => {
   const parsedLimit = parseInt(limit);
 
   try {
-    const esQuery = q
-      ? {
-          query: {
-            match: {
-              name: {
-                query: q,
-                fuzziness: 'AUTO',
-              },
-            },
-          },
-        }
-      : { query: { match_all: {} } };
-
     const { hits } = await client.search({
       index: 'items',
       from,
       size: parsedLimit,
-      ...esQuery,
+      body: {
+        query: {
+          match: {
+            name: {
+              query: q,
+              fuzziness: 2,
+            },
+          },
+        },
+      },
     });
 
     const results = hits.hits.map((hit) => hit._source);

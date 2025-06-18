@@ -53,11 +53,7 @@
 - Added mocks so tests could run properly without API dependency.
 - I chose to use Elasticsearch because I noticed the filter function was marked as “sub-optimal.” Added a fallback for safety.
 
-## 4. Challenges and Solutions
-
--
-
-## 5. How to Run
+## 4. How to Run
 
 To benefit from Elasticsearch use the command bellow in the terminal before start the application:
 
