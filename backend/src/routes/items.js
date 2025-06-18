@@ -27,7 +27,12 @@ async function readData() {
 // GET /api/items
 router.get('/', async (req, res, next) => {
   // Optimized search with Elasticsearch
-  const { limit = 500, q } = req.query;
+  const { q, limit = 2, page = 1 } = req.query;
+
+  const from = (page - 1) * limit;
+  const parsedPage = parseInt(page);
+  const parsedLimit = parseInt(limit);
+
   try {
     const esQuery = q
       ? {
@@ -44,7 +49,8 @@ router.get('/', async (req, res, next) => {
 
     const { hits } = await client.search({
       index: 'items',
-      size: parseInt(limit),
+      from,
+      size: parsedLimit,
       ...esQuery,
     });
 
@@ -54,7 +60,12 @@ router.get('/', async (req, res, next) => {
       return res.status(404).json({ error: 'Item not found!' });
     }
 
-    res.json(results);
+    res.json({
+      results,
+      total: hits.total.value,
+      page: parsedPage,
+      limit: parsedLimit,
+    });
   } catch (err) {
     // If error fallback to local search
     console.error('Elasticsearch failed, falling back to local data');
@@ -62,21 +73,28 @@ router.get('/', async (req, res, next) => {
       const data = await readData();
       let results = data;
 
+      const start = (parsedPage - 1) * parsedLimit;
+      const end = start + parsedLimit;
+
       if (q) {
         results = results.filter((item) =>
           item.name.toLowerCase().includes(q.toLowerCase())
         );
       }
 
-      if (limit) {
-        results = results.slice(0, parseInt(limit));
-      }
+      const total = results.length;
+      const paginatedResults = results.slice(start, end);
 
-      if (results.length === 0) {
+      if (paginatedResults.length === 0) {
         return res.status(404).json({ error: 'Item not found!' });
       }
 
-      res.json(results);
+      res.json({
+        results: paginatedResults,
+        total,
+        page: parsedPage,
+        limit: parsedLimit,
+      });
     } catch (fallbackErr) {
       next(fallbackErr);
     }
