@@ -1,13 +1,21 @@
+jest.mock('../src/elastic/client');
 const request = require('supertest');
 const express = require('express');
 const fs = require('fs');
 const itemsRouter = require('../src/routes/items');
+const mockItems = require('./__mocks__/mockItems');
+const client = require('../src/elastic/client');
 const app = express();
 
 app.use(express.json());
 app.use('/api/items', itemsRouter);
 
 beforeEach(() => {
+  // makes sure tests runs without API or Elasticsearch dependency
+  client.search.mockRejectedValue(new Error('Elasticsearch is down'));
+  jest
+    .spyOn(fs.promises, 'readFile')
+    .mockResolvedValue(JSON.stringify(mockItems));
   jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
 });
 
@@ -20,11 +28,13 @@ describe('GET /api/items', () => {
     const res = await request(app).get('/api/items');
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(mockItems.length);
   });
 
   it('should return filtered items when using query', async () => {
     const res = await request(app).get('/api/items?q=Noise');
     expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
     expect(res.body).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: expect.stringMatching(/noise/i) }),
