@@ -40,5 +40,30 @@
     "category": "Electronics",
     "price": 109.99,
     "id": 1750114650575
+  },
+  {
+    "id": 1750120848255,
+    "name": "Bluetooth Headset",
+    "price": 109.99
+  },
+  {
+    "id": 1750121117610,
+    "name": "New Gadget",
+    "price": 19.99
+  },
+  {
+    "id": 1750121763910,
+    "name": "New Gadget",
+    "price": 19.99
+  },
+  {
+    "id": 1750121858915,
+    "name": "New Gadget",
+    "price": 19.99
+  },
+  {
+    "id": 1750121928056,
+    "name": "New Gadget",
+    "price": 19.99
   }
 ]

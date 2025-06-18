@@ -48,6 +48,6 @@ describe('POST /api/items', () => {
   it('should return error when payload is invalid', async () => {
     const res = await request(app).post('/api/items').send({});
 
-    expect(res.statusCode).toBeGreaterThanOrEqual(400);
+    expect(res.statusCode).toBe(400);
   });
 });
