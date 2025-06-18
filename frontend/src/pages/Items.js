@@ -36,12 +36,6 @@ function Items() {
     };
   }, [fetchItems, page]);
 
-  // number of pages according to limit
-  const pagination = Array.from(
-    { length: items?.total / limit },
-    (_v, k) => k + 1
-  );
-
   if (isLoading) return <Loader />;
 
   return (
@@ -50,7 +44,7 @@ function Items() {
 
       <ItemList items={items} />
 
-      <Pagination pagination={pagination} items={items} setPage={setPage} />
+      <Pagination limit={limit} items={items} setPage={setPage} />
     </main>
   );
 }

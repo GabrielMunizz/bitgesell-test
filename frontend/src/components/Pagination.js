@@ -1,6 +1,12 @@
 import React from 'react';
 
-function Pagination({ pagination, items, setPage }) {
+function Pagination({ limit, items, setPage }) {
+  // number of pages according to limit
+  const pagination = Array.from(
+    { length: items?.total / limit },
+    (_v, k) => k + 1
+  );
+
   return (
     <div>
       <p>Page</p>
